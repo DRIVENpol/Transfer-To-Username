@@ -40,6 +40,13 @@ _tokenToTransfer.approve(_toUser, _amount);
 _tokenToTransfer.transferFrom(address(this), _toUser, _amount);
 }
 
+function _transferEthToContract(uint256 _amount) internal {
+ payable(address(this)).transfer(_amount);
+}
+function _transferEthFromContract(address _toUser, uint256 _amount) internal {
+    payable(_toUser).transfer(_amount);
+}
+
 // PUBLIC FUNCTIONS
 function setMyUsername(string memory newUsername) public payable {
 require(changeCount[msg.sender] == true, "You can't change your username!");
@@ -54,6 +61,14 @@ function sendToUSername(string memory toUser, address tokenAddress, uint256 amou
     address _fromUser = msg.sender;
     _transferToContract(_fromUser, tokenAddress, amount);
     _transferFromContract(_toUser, tokenAddress, amount);
-
 }
+
+function sendEthToUsername(string memory toUser, uint256 amount) public payable {
+    require(msg.value >= feeOnTransfer, "Pay the fee before transfer!");
+    address _toUser = usernameToAddress[toUser];
+    _transferEthToContract(amount);
+    _transferEthFromContract(_toUser, amount);
+}
+
+// TO DO: EVENTS AND CALL EVENTS
 }
