@@ -3,13 +3,15 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./SafeMath.sol";
 
 
 contract TransferToUsername is Ownable {
 
 using SafeMath for uint256;
+ using SafeERC20 for IERC20;
 
 // VARIABLES
 uint256 public feeOnTransfer;
@@ -18,7 +20,7 @@ uint256 public feeSetUsername;
 // MAPPINGS
 mapping(address => string) public addressToUsername;
 mapping(string => address) public usernameToAddress;
-mapping(address => bool) public changeCount;
+
 
 // EVENTS
 event SetUsername(
@@ -41,15 +43,11 @@ usernameToAddress[_newUsername] = _givenAccount;
 }
 
 function _transferToContract(address _fromUser, address _tokenAddress, uint256 _amount) internal {
-IERC20 _tokenToTransfer = IERC20(_tokenAddress);
-_tokenToTransfer.approve(address(this), _amount);
-_tokenToTransfer.transferFrom(_fromUser, address(this), _amount);
+IERC20(_tokenAddress).safeTransferFrom(_fromUser, address(this), _amount);
 }
 
 function _transferFromContract(address _toUser, address _tokenAddress, uint256 _amount) internal {
-IERC20 _tokenToTransfer = IERC20(_tokenAddress);
-_tokenToTransfer.approve(_toUser, _amount);
-_tokenToTransfer.transferFrom(address(this), _toUser, _amount);
+IERC20(_tokenAddress).safeTransferFrom(address(this), _toUser, _amount);
 }
 
 function _transferEthToContract(uint256 _amount) internal {
@@ -61,15 +59,11 @@ function _transferEthFromContract(address _toUser, uint256 _amount) internal {
 
 // PUBLIC FUNCTIONS
 function setMyUsername(string memory newUsername) public payable {
-require(changeCount[msg.sender] == true, "You can't change your username!");
-changeCount[msg.sender] = false;
-require(msg.value >= feeSetUsername, "Please pay the fee in order to choose an username!");
 _setMyUsername(newUsername, msg.sender);
 emit SetUsername(newUsername, msg.sender);
 }
 
 function sendToUSername(string memory toUser, address tokenAddress, uint256 amount) public payable {
-    require(msg.value >= feeOnTransfer, "Pay the fee before transfer!");
     address _toUser = usernameToAddress[toUser];
     address _fromUser = msg.sender;
     _transferToContract(_fromUser, tokenAddress, amount);
@@ -78,7 +72,7 @@ function sendToUSername(string memory toUser, address tokenAddress, uint256 amou
 }
 
 function sendEthToUsername(string memory toUser, uint256 amount) public payable {
-    require(msg.value >= feeOnTransfer, "Pay the fee before transfer!");
+  //  require(msg.value >= feeOnTransfer, "Pay the fee before transfer!");
     address _toUser = usernameToAddress[toUser];
     _transferEthToContract(amount);
     _transferEthFromContract(_toUser, amount);
