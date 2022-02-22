@@ -22,13 +22,13 @@ mapping(address => bool) public changeCount;
 
 // EVENTS
 event SetUsername(
-string memory chosenUsername,
-address user
+string chosenUsername,
+address indexed user
 );
 
 event SendTokens(
-    string memory usernameReceiver,
-    string memory usernameSender,
+    string usernameReceiver,
+    string usernameSender,
     address tokenAddress,
     uint256 amount
 );
@@ -74,7 +74,7 @@ function sendToUSername(string memory toUser, address tokenAddress, uint256 amou
     address _fromUser = msg.sender;
     _transferToContract(_fromUser, tokenAddress, amount);
     _transferFromContract(_toUser, tokenAddress, amount);
-    emit SendTokens(_toUser, msg.sender, tokenAddress, amount);
+    emit SendTokens(toUser, addressToUsername[msg.sender], tokenAddress, amount);
 }
 
 function sendEthToUsername(string memory toUser, uint256 amount) public payable {
