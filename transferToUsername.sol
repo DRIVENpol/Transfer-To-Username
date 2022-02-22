@@ -15,11 +15,23 @@ using SafeMath for uint256;
 uint256 public feeOnTransfer;
 uint256 public feeSetUsername;
 
-
 // MAPPINGS
 mapping(address => string) public addressToUsername;
 mapping(string => address) public usernameToAddress;
 mapping(address => bool) public changeCount;
+
+// EVENTS
+event SetUsername(
+string memory chosenUsername,
+address user
+);
+
+event SendTokens(
+    string memory usernameReceiver,
+    string memory usernameSender,
+    address tokenAddress,
+    uint256 amount
+);
 
 // INTERNAL FUNCTIONS
 function _setMyUsername(string memory _newUsername, address _givenAccount) internal {
@@ -53,6 +65,7 @@ require(changeCount[msg.sender] == true, "You can't change your username!");
 changeCount[msg.sender] = false;
 require(msg.value >= feeSetUsername, "Please pay the fee in order to choose an username!");
 _setMyUsername(newUsername, msg.sender);
+emit SetUsername(newUsername, msg.sender);
 }
 
 function sendToUSername(string memory toUser, address tokenAddress, uint256 amount) public payable {
@@ -61,6 +74,7 @@ function sendToUSername(string memory toUser, address tokenAddress, uint256 amou
     address _fromUser = msg.sender;
     _transferToContract(_fromUser, tokenAddress, amount);
     _transferFromContract(_toUser, tokenAddress, amount);
+    emit SendTokens(_toUser, msg.sender, tokenAddress, amount);
 }
 
 function sendEthToUsername(string memory toUser, uint256 amount) public payable {
@@ -69,6 +83,4 @@ function sendEthToUsername(string memory toUser, uint256 amount) public payable 
     _transferEthToContract(amount);
     _transferEthFromContract(_toUser, amount);
 }
-
-// TO DO: EVENTS AND CALL EVENTS
 }
