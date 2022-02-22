@@ -2,8 +2,7 @@
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "./IBEP20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
@@ -11,7 +10,6 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract TransferToUsername is Ownable {
 
 using SafeMath for uint256;
- using SafeERC20 for IERC20;
 
 // VARIABLES
 uint256 public feeOnTransfer;
@@ -43,11 +41,11 @@ usernameToAddress[_newUsername] = _givenAccount;
 }
 
 function _transferToContract(address _fromUser, address _tokenAddress, uint256 _amount) internal {
-IERC20(_tokenAddress).safeTransferFrom(_fromUser, address(this), _amount);
+IBEP20(_tokenAddress).transferFrom(_fromUser, address(this), _amount);
 }
 
 function _transferFromContract(address _toUser, address _tokenAddress, uint256 _amount) internal {
-IERC20(_tokenAddress).safeTransferFrom(address(this), _toUser, _amount);
+IBEP20(_tokenAddress).transferFrom(address(this), _toUser, _amount);
 }
 
 function _transferEthToContract(uint256 _amount) internal {
